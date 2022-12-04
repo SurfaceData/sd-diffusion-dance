@@ -1,0 +1,54 @@
+{
+  "environments": [
+    {
+      "id": "development",
+      "name": "Development",
+      "region": "ap-southeast-1",
+      "source": {
+        "branch": "main"
+      },
+      "services": [
+        {
+          "id": "sdc-template-api",
+          "name": "Surface Redwood Template API",
+          "domain": "template.api.surfacedata.org",
+          "type": "fargate",
+          "cpu": 0.25,
+          "memory": 0.5,
+          "installCommand": "yarn set version 3.2.0 && NODE_ENV=development yarn install --immutable",
+          "buildCommand": "yarn rw deploy flightcontrol api",
+          "startCommand": "yarn rw deploy flightcontrol api --serve",
+          "postBuildCommand": "echo 0",
+          "port": 8911,
+          "healthCheckPath": "/graphql/health",
+          "envVariables": {
+            "REDWOOD_WEB_URL": {
+              "fromService": {
+                "id": "sdc-template-web",
+                "value": "origin"
+              }
+            }
+          }
+        },
+        {
+          "id": "sdc-template-web",
+          "name": "Surface Redwood Template Web",
+          "domain": "template.surfacedata.org",
+          "type": "static",
+          "singlePageApp": true,
+          "installCommand": "yarn set version 3.2.0 && NODE_ENV=development yarn install --immutable",
+          "buildCommand": "yarn rw deploy flightcontrol web",
+          "outputDirectory": "web/dist",
+          "envVariables": {
+            "REDWOOD_API_URL": {
+              "fromService": {
+                "id": "sdc-template-api",
+                "value": "origin"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

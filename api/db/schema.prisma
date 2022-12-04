@@ -1,0 +1,25 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+model User {
+  id                  Int @id @default(autoincrement())
+  email               String  @unique
+  hashedPassword      String
+  role                String @default("general")
+  salt                String
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+}
+
+model DiffusionQuery {
+  id        Int @id @default(autoincrement())
+  raw       Json
+  createdAt DateTime @default(now())
+}

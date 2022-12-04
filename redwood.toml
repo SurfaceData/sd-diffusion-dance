@@ -1,0 +1,9 @@
+[web]
+  title = "Surface RedwoodTemplate"
+  port = 8910
+  apiUrl = "${API_URL:/api}"       # Set API_URL in production to the Serverless deploy endpoint of your api service, see https://redwoodjs.com/docs/deploy/serverless-deploy
+  includeEnvironmentVariables = ["SUPABASE_URL","SUPABASE_KEY"]
+[api]
+  port = 8911
+[browser]
+  open = true
