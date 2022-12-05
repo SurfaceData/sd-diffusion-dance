@@ -1,8 +1,10 @@
 import { useLazyQuery } from '@apollo/client'
-import { Image, Flex, Spinner, Switch } from '@chakra-ui/react'
+import { Box, Image, Flex, Spinner, Switch, Text } from '@chakra-ui/react'
 import {
   Button,
   LabeledInput,
+  LabeledNumberInput,
+  LabeledTextarea,
   LabeledSelect,
   LabeledSlider,
 } from '@surfacedata/sd-components'
@@ -12,11 +14,28 @@ import { MetaTags } from '@redwoodjs/web'
 
 import { useRef, useState } from 'react'
 
+import GenerationResult from 'src/components/GenerationResult'
+import PromptAnalysis from 'src/components/PromptAnalysis'
+
 const QUERY = gql`
   query StableDiffusion($input: GenerateImageInput!) {
     generateImage(input: $input) {
-      id
-      content
+      generation {
+        id
+        content
+        neighbor {
+          url
+          caption
+          similarity
+        }
+      }
+      promptAnalysis {
+        neighbor {
+          url
+          caption
+          similarity
+        }
+      }
     }
   }
 `
@@ -37,6 +56,7 @@ const HomePage = () => {
   const [useRandom, setUseRandom] = useState(true)
 
   const onClick = () => {
+    console.log('generate')
     generateImage({
       variables: {
         input: {
@@ -58,8 +78,8 @@ const HomePage = () => {
       ) : (
         <div>
           <Flex spacing="12px" direction="column" gap="4">
-            <LabeledInput name="prompt" label="Prompt" ref={promptEl} />
-            <LabeledInput
+            <LabeledTextarea name="prompt" label="Prompt" ref={promptEl} />
+            <LabeledTextarea
               name="negative_prompt"
               label="Negative Prompt"
               ref={negPromptEl}
@@ -115,33 +135,38 @@ const HomePage = () => {
               ]}
             />
 
-            <Switch
-              defaultValue={useRandom}
-              onChange={(event) => {
-                setUseRandom(!useRandom)
-              }}
-            />
-            {!useRandom && (
-              <LabeledInput
+            <Flex align="center" justify="space-between">
+              <Box>
+                <Text>Use Fixed Seed</Text>
+                <Switch
+                  defaultValue={useRandom}
+                  onChange={(event) => {
+                    setUseRandom(!useRandom)
+                  }}
+                />
+              </Box>
+              <Flex />
+              <LabeledNumberInput
                 name="seed"
                 label="Seed"
                 ref={seedEl}
                 type="number"
               />
-            )}
+            </Flex>
 
             <Flex direction="row" justify="space-between">
-              <Button size="sm" onClick={onClick}>
-                cats
+              <Button variant="solid" size="md" onClick={onClick}>
+                Generate
               </Button>
 
               {loading && <Spinner />}
             </Flex>
           </Flex>
 
+          {data && <PromptAnalysis data={data.generateImage.promptAnalysis} />}
           {data &&
-            data.generateImage.map(({ id, content }) => (
-              <Image key={id} src={content} />
+            data.generateImage.generation.map((data) => (
+              <GenerationResult id={data.id} data={data} />
             ))}
         </div>
       )}

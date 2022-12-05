@@ -1,7 +1,23 @@
 export const schema = gql`
-  type DiffusionResult {
+  type NeighborResult {
+    url: String
+    caption: String
+    similarity: Float
+  }
+
+  type GenerationResult {
     id: String!
     content: String!
+    neighbor: [NeighborResult]
+  }
+
+  type PromptAnalysis {
+    neighbor: [NeighborResult]
+  }
+
+  type DiffusionResult {
+    generation: [GenerationResult]
+    promptAnalysis: PromptAnalysis!
   }
 
   input GenerateImageInput {
@@ -17,6 +33,6 @@ export const schema = gql`
   }
 
   type Query {
-    generateImage(input: GenerateImageInput!): [DiffusionResult]! @skipAuth
+    generateImage(input: GenerateImageInput!): DiffusionResult! @skipAuth
   }
 `
